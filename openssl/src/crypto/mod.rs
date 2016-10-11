@@ -17,7 +17,7 @@
 pub mod hash;
 pub mod hmac;
 pub mod pkcs5;
-// pub mod pkcs12;
+pub mod pkcs12;
 pub mod pkey;
 pub mod rand;
 pub mod symm;

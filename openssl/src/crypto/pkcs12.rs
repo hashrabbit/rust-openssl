@@ -50,7 +50,7 @@ impl Pkcs12 {
                 let x509 = *(*chain).stack.data.offset(i as isize) as *mut _;
                 chain_out.push(X509::from_ptr(x509));
             }
-            ffi::sk_free(&mut (*chain).stack);
+            ffi::OPENSSL_sk_free(&mut (*chain).stack);
 
             Ok(ParsedPkcs12 {
                 pkey: pkey,
