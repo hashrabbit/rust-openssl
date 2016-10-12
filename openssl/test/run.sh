@@ -7,6 +7,7 @@ fi
 
 if [ -d "$HOME/openssl/lib" ]; then
     export OPENSSL_DIR=$HOME/openssl
+    export PATH=$HOME/openssl/bin:$PATH
 fi
 
 cargo run --manifest-path systest/Cargo.toml --target $TARGET
