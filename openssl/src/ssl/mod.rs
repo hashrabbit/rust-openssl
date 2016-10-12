@@ -108,11 +108,11 @@ fn get_ssl_verify_data_idx<T: Any + 'static>() -> c_int {
     *SSL_INDEXES.lock().unwrap().entry(TypeId::of::<T>()).or_insert_with(|| get_new_ssl_idx::<T>())
 }
 
-#[cfg(feature = "npn")]
+#[cfg(all(feature = "npn", not(ossl101)))]
 lazy_static! {
     static ref NPN_PROTOS_IDX: c_int = get_new_idx::<Vec<u8>>();
 }
-#[cfg(feature = "alpn")]
+#[cfg(all(feature = "alpn", not(ossl101)))]
 lazy_static! {
     static ref ALPN_PROTOS_IDX: c_int = get_new_idx::<Vec<u8>>();
 }
@@ -213,7 +213,7 @@ extern fn raw_sni<F>(ssl: *mut ffi::SSL, al: *mut c_int, _arg: *mut c_void) -> c
     }
 }
 
-#[cfg(any(feature = "npn", feature = "alpn"))]
+#[cfg(all(any(feature = "npn", feature = "alpn"), not(ossl101)))]
 unsafe fn select_proto_using(ssl: *mut ffi::SSL,
                              out: *mut *mut c_uchar,
                              outlen: *mut c_uchar,
@@ -246,7 +246,7 @@ unsafe fn select_proto_using(ssl: *mut ffi::SSL,
 /// supported by the server. It achieves this by delegating to the `SSL_select_next_proto`
 /// function. The list of protocols supported by the client is found in the extra data of the
 /// OpenSSL context.
-#[cfg(feature = "npn")]
+#[cfg(all(feature = "npn", not(ossl101)))]
 extern fn raw_next_proto_select_cb(ssl: *mut ffi::SSL,
                                    out: *mut *mut c_uchar,
                                    outlen: *mut c_uchar,
@@ -257,7 +257,7 @@ extern fn raw_next_proto_select_cb(ssl: *mut ffi::SSL,
     unsafe { select_proto_using(ssl, out, outlen, inbuf, inlen, *NPN_PROTOS_IDX) }
 }
 
-#[cfg(feature = "alpn")]
+#[cfg(all(feature = "alpn", not(ossl101)))]
 extern fn raw_alpn_select_cb(ssl: *mut ffi::SSL,
                              out: *mut *const c_uchar,
                              outlen: *mut c_uchar,
@@ -275,7 +275,7 @@ extern fn raw_alpn_select_cb(ssl: *mut ffi::SSL,
 /// that it supports.
 /// The list of supported protocols is found in the extra data of the OpenSSL
 /// context.
-#[cfg(feature = "npn")]
+#[cfg(all(feature = "npn", not(ossl101)))]
 extern fn raw_next_protos_advertise_cb(ssl: *mut ffi::SSL,
                                        out: *mut *const c_uchar,
                                        outlen: *mut c_uint,
@@ -302,7 +302,7 @@ extern fn raw_next_protos_advertise_cb(ssl: *mut ffi::SSL,
 
 /// Convert a set of byte slices into a series of byte strings encoded for SSL. Encoding is a byte
 /// containing the length followed by the string.
-#[cfg(any(feature = "npn", feature = "alpn"))]
+#[cfg(all(any(feature = "alpn", feature = "npn"), not(ossl101)))]
 fn ssl_encode_byte_strings(strings: &[&[u8]]) -> Vec<u8> {
     let mut enc = Vec::new();
     for string in strings {
@@ -507,18 +507,30 @@ impl<'a> SslContextRef<'a> {
         })
     }
 
-    /// If `onoff` is set to `true`, enable ECDHE for key exchange with compatible
-    /// clients, and automatically select an appropriate elliptic curve.
+    /// If `onoff` is set to `true`, enable ECDHE for key exchange with
+    /// compatible clients, and automatically select an appropriate elliptic
+    /// curve.
     ///
-    /// This method requires OpenSSL >= 1.0.2 or LibreSSL and the `ecdh_auto` feature.
-    #[cfg(feature = "ecdh_auto")]
+    /// This method requires OpenSSL >= 1.0.2 or LibreSSL and the `ecdh_auto`
+    /// feature.
+    #[cfg(all(feature = "ecdh_auto", not(ossl101)))]
     pub fn set_ecdh_auto(&mut self, onoff: bool) -> Result<(), ErrorStack> {
+        self._set_ecdh_auto(onoff)
+    }
+
+    #[cfg(all(feature = "ecdh_auto", ossl102))]
+    fn _set_ecdh_auto(&mut self, onoff: bool) -> Result<(), ErrorStack> {
         wrap_ssl_result(unsafe {
             ffi::SSL_CTX_ctrl(self.as_ptr(),
                               ffi::SSL_CTRL_SET_ECDH_AUTO,
                               onoff as c_long,
                               ptr::null_mut()) as c_int
         })
+    }
+
+    #[cfg(all(feature = "ecdh_auto", ossl110))]
+    fn _set_ecdh_auto(&mut self, _onoff: bool) -> Result<(), ErrorStack> {
+        Ok(())
     }
 
     pub fn set_options(&mut self, option: SslContextOptions) -> SslContextOptions {
@@ -540,7 +552,7 @@ impl<'a> SslContextRef<'a> {
     /// supported by the application).
     ///
     /// This method needs the `npn` feature.
-    #[cfg(feature = "npn")]
+    #[cfg(all(feature = "npn", not(ossl101)))]
     pub fn set_npn_protocols(&mut self, protocols: &[&[u8]]) {
         // Firstly, convert the list of protocols to a byte-array that can be passed to OpenSSL
         // APIs -- a list of length-prefixed strings.
@@ -572,7 +584,7 @@ impl<'a> SslContextRef<'a> {
     /// Note that ordering of the protocols controls the priority with which they are chosen.
     ///
     /// This method needs the `alpn` feature.
-    #[cfg(feature = "alpn")]
+    #[cfg(all(feature = "alpn", not(ossl101)))]
     pub fn set_alpn_protocols(&mut self, protocols: &[&[u8]]) {
         let protocols: Box<Vec<u8>> = Box::new(ssl_encode_byte_strings(protocols));
         unsafe {
@@ -915,7 +927,7 @@ impl<'a> SslRef<'a> {
     /// to interpret it.
     ///
     /// This method needs the `alpn` feature.
-    #[cfg(feature = "alpn")]
+    #[cfg(all(feature = "alpn", not(ossl101)))]
     pub fn selected_alpn_protocol(&self) -> Option<&[u8]> {
         unsafe {
             let mut data: *const c_uchar = ptr::null();
