@@ -64,35 +64,12 @@ fn find_openssl_dir(target: &str) -> OsString {
 
     try_pkg_config();
 
-    // TODO: try to be more helpful in this message, e.g.:
-    //
-    // * if we're on linux, recommend apt-get something or other
-    // * if we're on Windows, link to a README explaining more
-
-    if host.contains("apple-darwin") && target.contains("apple-darwin") {
-        let system = Path::new("/usr/lib/libssl.0.9.8.dylib");
-        if system.exists() {
-            panic!("
-
-Failed to find an approprate OpenSSL installation. It looks like you're
-compiling on macOS, where the system contains a version of OpenSSL 0.9.8. This
-crate no longer supports OpenSSL 0.9.8.
-
-As a consumer of this crate, you can fix this error by using Homebrew to
-install the `openssl` package, or as a maintainer you can use the openssl-sys
-0.7 crate for support with OpenSSL 0.9.8.
-
-Unfortunately though the compile cannot continue, so aborting.
-
-");
-        }
-    }
-
-    panic!("
+    let mut msg = format!("
 
 Could not find directory of OpenSSL installation, and this `-sys` crate cannot
-proceed without this knowledge. To help this crate find this directory
-you can set the `OPENSSL_DIR` environment variable for the compilation process.
+proceed without this knowledge. If OpenSSL is installed and this crate had
+trouble finding it,  you can set the `OPENSSL_DIR` environment variable for the
+compilation process.
 
 If you're in a situation where you think the directory *should* be found
 automatically, please open a bug at https://github.com/sfackler/rust-openssl
@@ -104,6 +81,52 @@ and include information about your system as well as this message.
 
 ",
     host, target, env!("CARGO_PKG_VERSION"));
+
+    if host.contains("apple-darwin") && target.contains("apple-darwin") {
+        let system = Path::new("/usr/lib/libssl.0.9.8.dylib");
+        if system.exists() {
+            msg.push_str(&format!("
+
+It looks like you're compiling on macOS, where the system contains a version of
+OpenSSL 0.9.8. This crate no longer supports OpenSSL 0.9.8.
+
+As a consumer of this crate, you can fix this error by using Homebrew to
+install the `openssl` package, or as a maintainer you can use the openssl-sys
+0.7 crate for support with OpenSSL 0.9.8.
+
+Unfortunately though the compile cannot continue, so aborting.
+
+"));
+        }
+    }
+
+    if host.contains("windows") && target.contains("windows-gnu") {
+        msg.push_str(&format!("
+It looks like you're compiling for MinGW but you may not have either OpenSSL or
+pkg-config installed. You can install these two dependencies with:
+
+    pacman -S openssl pkg-config
+
+and try building this crate again.
+
+"
+));
+    }
+
+    if host.contains("windows") && target.contains("windows-msvc") {
+        msg.push_str(&format!("
+It looks like you're compiling for MSVC but we couldn't detect an OpenSSL
+installation. If there isn't one installed then you can try the rust-openssl
+README for more information about how to download precompiled binaries of
+OpenSSL:
+
+    https://github.com/sfackler/rust-openssl#windows
+
+"
+));
+    }
+
+    panic!(msg);
 }
 
 /// Attempt to find OpenSSL through pkg-config.
