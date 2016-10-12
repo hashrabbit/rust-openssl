@@ -549,9 +549,9 @@ mod test {
 
    #[test]
    fn test_public_encrypt_pkcs() {
-       let mut k0 = super::RSA::generate(512).unwrap();
+       let k0 = super::RSA::generate(512).unwrap();
        let k0pkey = k0.public_key_to_pem().unwrap();
-       let mut k1 = super::RSA::public_key_from_pem(&k0pkey).unwrap();
+       let k1 = super::RSA::public_key_from_pem(&k0pkey).unwrap();
 
        let msg = vec!(0xdeu8, 0xadu8, 0xd0u8, 0x0du8);
 
