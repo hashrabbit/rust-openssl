@@ -32,8 +32,8 @@ fn main() {
     let version = validate_headers(&[include_dir.clone().into()],
                                    &[lib_dir.clone().into()]);
 
-    let libs = if (version.contains("OpenSSL 1.0.1") ||
-                   version.contains("OpenSSL 1.0.2")) &&
+    let libs = if (version.contains("0x10001") ||
+                   version.contains("0x10002")) &&
                   target.contains("windows") {
         ["ssleay32", "libeay32"]
     } else if target.contains("windows") {
