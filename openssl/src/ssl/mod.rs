@@ -956,15 +956,6 @@ impl<'a> SslRef<'a> {
         Some(s)
     }
 
-    // TODO: figure out how to re-expose
-    //
-    // pub fn ssl_method(&self) -> SslMethod {
-    //     unsafe {
-    //         let method = ffi::SSL_get_ssl_method(self.as_ptr());
-    //         SslMethod::from_raw(method).unwrap()
-    //     }
-    // }
-
     /// Returns the server's name for the current connection
     pub fn servername(&self) -> Option<String> {
         let name = unsafe { ffi::SSL_get_servername(self.as_ptr(), ffi::TLSEXT_NAMETYPE_host_name) };
