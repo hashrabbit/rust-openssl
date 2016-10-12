@@ -176,35 +176,31 @@ fn validate_headers(include_dirs: &[PathBuf],
     };
     f.read_to_string(&mut version_header).unwrap();
 
-    // Do a bit of string parsing to find `#define OPENSSL_VERSION_TEXT "..."`
+    // Do a bit of string parsing to find `#define OPENSSL_VERSION_NUMBER ...`
     let version_line = version_header.lines().find(|l| {
-        l.contains("OPENSSL_VERSION_TEXT") && !l.contains("fips")
+        l.contains("define ") && l.contains("OPENSSL_VERSION_NUMBER")
     }).and_then(|line| {
-        let start = match line.find("\"") {
+        let start = match line.find("0x") {
             Some(start) => start,
             None => return None,
         };
-        let end = match line[start + 1..].find("\"") {
-            Some(end) => start + 1 + end,
-            None => return None,
-        };
-        Some(&line[start..end])
+        Some(line[start..].trim())
     });
     let version_text = match version_line {
         Some(text) => text,
         None => {
-            panic!("header file at `{}` did not include `OPENSSL_VERSION_TEXT` \
+            panic!("header file at `{}` did not include `OPENSSL_VERSION_NUMBER` \
                     that this crate recognized, failed to learn about the \
                     OpenSSL version number");
         }
     };
-    if version_text.contains("OpenSSL 1.0.1") {
+    if version_text.contains("0x10001") {
         println!("cargo:rustc-cfg=ossl101");
         println!("cargo:is_101=1");
-    } else if version_text.contains("OpenSSL 1.0.2") {
+    } else if version_text.contains("0x10002") {
         println!("cargo:rustc-cfg=ossl102");
         println!("cargo:is_102=1");
-    } else if version_text.contains("OpenSSL 1.1.0") {
+    } else if version_text.contains("0x10100") {
         println!("cargo:rustc-cfg=ossl110");
         println!("cargo:is_110=1");
     } else {
@@ -228,7 +224,7 @@ The build is now aborting due to this version mismatch.
     // file of OpenSSL, `opensslconf.h`, and then dump out everything it defines
     // as our own #[cfg] directives. That way the `ossl10x.rs` bindings can
     // account for compile differences and such.
-    if version_text.contains("OpenSSL 1.0") {
+    if version_text.contains("0x1000") {
         let mut conf_header = String::new();
         let mut include = include_dirs.iter()
                                       .map(|p| p.join("openssl/opensslconf.h"))
