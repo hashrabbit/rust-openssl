@@ -137,4 +137,10 @@ extern {
     pub fn X509_up_ref(x: *mut X509) -> c_int;
     pub fn SSL_CTX_up_ref(x: *mut SSL_CTX) -> c_int;
     pub fn X509_get0_extensions(req: *const ::X509) -> *const stack_st_X509_EXTENSION;
+
+    pub fn OpenSSL_version_num() -> c_ulong;
+    pub fn OpenSSL_version(key: c_int) -> *const c_char;
+    pub fn OPENSSL_sk_free(st: *mut _STACK);
+    pub fn OPENSSL_sk_pop_free(st: *mut _STACK, free: Option<unsafe extern "C" fn (*mut c_void)>);
+    pub fn OPENSSL_sk_pop(st: *mut _STACK) -> *mut c_void;
 }

@@ -50,7 +50,7 @@ impl Pkcs12 {
                 let x509 = *(*chain).stack.data.offset(i as isize) as *mut _;
                 chain_out.push(X509::from_ptr(x509));
             }
-            ffi::OPENSSL_sk_free(&mut (*chain).stack);
+            compat::OPENSSL_sk_free(&mut (*chain).stack);
 
             Ok(ParsedPkcs12 {
                 pkey: pkey,
@@ -67,6 +67,16 @@ pub struct ParsedPkcs12 {
     pub cert: X509,
     pub chain: Vec<X509>,
     _p: (),
+}
+
+#[cfg(ossl110)]
+mod compat {
+    pub use ffi::OPENSSL_sk_free;
+}
+
+#[cfg(ossl10x)]
+mod compat {
+    pub use ffi::sk_free as OPENSSL_sk_free;
 }
 
 #[cfg(test)]

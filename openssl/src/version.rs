@@ -11,7 +11,6 @@
 // limitations under the License.
 //
 
-use ffi;
 use std::ffi::CStr;
 
 #[cfg(ossl10x)]
@@ -21,12 +20,16 @@ use ffi::{
     SSLEAY_BUILT_ON as OPENSSL_BUILT_ON,
     SSLEAY_PLATFORM as OPENSSL_PLATFORM,
     SSLEAY_DIR as OPENSSL_DIR,
+    SSLeay as OpenSSL_version_num,
+    SSLeay_version as OpenSSL_version,
 };
 
 #[cfg(ossl110)]
 use ffi::{OPENSSL_VERSION, OPENSSL_CFLAGS};
 #[cfg(ossl110)]
 use ffi::{OPENSSL_BUILT_ON, OPENSSL_PLATFORM, OPENSSL_DIR};
+#[cfg(ossl110)]
+use ffi::{OpenSSL_version_num, OpenSSL_version};
 
 /// OPENSSL_VERSION_NUMBER is a numeric release version identifier:
 ///
@@ -53,34 +56,34 @@ use ffi::{OPENSSL_BUILT_ON, OPENSSL_PLATFORM, OPENSSL_DIR};
 ///
 /// The return value of this function can be compared to the macro to make sure that the correct version of the library has been loaded, especially when using DLLs on Windows systems.
 pub fn number() -> i64 {
-    unsafe { ffi::OpenSSL_version_num() as i64 }
+    unsafe { OpenSSL_version_num() as i64 }
 }
 
 
 /// The text variant of the version number and the release date. For example, "OpenSSL 0.9.5a 1 Apr 2000".
 pub fn version() -> &'static str {
-    unsafe { CStr::from_ptr(ffi::OpenSSL_version(OPENSSL_VERSION)).to_str().unwrap() }
+    unsafe { CStr::from_ptr(OpenSSL_version(OPENSSL_VERSION)).to_str().unwrap() }
 }
 
 /// The compiler flags set for the compilation process in the form "compiler: ..." if available or
 /// "compiler: information not available" otherwise.
 pub fn c_flags() -> &'static str {
-    unsafe { CStr::from_ptr(ffi::OpenSSL_version(OPENSSL_CFLAGS)).to_str().unwrap() }
+    unsafe { CStr::from_ptr(OpenSSL_version(OPENSSL_CFLAGS)).to_str().unwrap() }
 }
 
 /// The date of the build process in the form "built on: ..." if available or "built on: date not available" otherwise.
 pub fn built_on() -> &'static str {
-    unsafe { CStr::from_ptr(ffi::OpenSSL_version(OPENSSL_BUILT_ON)).to_str().unwrap() }
+    unsafe { CStr::from_ptr(OpenSSL_version(OPENSSL_BUILT_ON)).to_str().unwrap() }
 }
 
 /// The "Configure" target of the library build in the form "platform: ..." if available or "platform: information not available" otherwise.
 pub fn platform() -> &'static str {
-    unsafe { CStr::from_ptr(ffi::OpenSSL_version(OPENSSL_PLATFORM)).to_str().unwrap() }
+    unsafe { CStr::from_ptr(OpenSSL_version(OPENSSL_PLATFORM)).to_str().unwrap() }
 }
 
 /// The "OPENSSLDIR" setting of the library build in the form "OPENSSLDIR: "..."" if available or "OPENSSLDIR: N/A" otherwise.
 pub fn dir() -> &'static str {
-    unsafe { CStr::from_ptr(ffi::OpenSSL_version(OPENSSL_DIR)).to_str().unwrap() }
+    unsafe { CStr::from_ptr(OpenSSL_version(OPENSSL_DIR)).to_str().unwrap() }
 }
 
 /// This test ensures that we do not segfault when calling the functions of this module

@@ -788,7 +788,7 @@ impl<'a> Drop for GeneralNames<'a> {
             // This transmute is dubious but it's what openssl itself does...
             let free: unsafe extern fn(*mut ffi::GENERAL_NAME) = ffi::GENERAL_NAME_free;
             let free: unsafe extern fn(*mut c_void) = mem::transmute(free);
-            ffi::OPENSSL_sk_pop_free(&mut (*self.stack).stack, Some(free));
+            ffi::sk_pop_free(&mut (*self.stack).stack, Some(free));
         }
     }
 

@@ -716,19 +716,7 @@ extern {
                         -> c_int;
     pub fn PKCS12_free(p12: *mut PKCS12);
 
-    #[cfg_attr(any(ossl101, ossl102), link_name = "sk_free")]
-    pub fn OPENSSL_sk_free(st: *mut _STACK);
-    #[cfg_attr(any(ossl101, ossl102), link_name = "sk_pop_free")]
-    pub fn OPENSSL_sk_pop_free(st: *mut _STACK, free: Option<unsafe extern "C" fn (*mut c_void)>);
-    #[cfg_attr(any(ossl101, ossl102), link_name = "sk_pop")]
-    pub fn OPENSSL_sk_pop(st: *mut _STACK) -> *mut c_void;
-
     pub fn GENERAL_NAME_free(name: *mut GENERAL_NAME);
-
-    #[cfg_attr(any(ossl101, ossl102), link_name = "SSLeay")]
-    pub fn OpenSSL_version_num() -> c_ulong;
-    #[cfg_attr(any(ossl101, ossl102), link_name = "SSLeay_version")]
-    pub fn OpenSSL_version(key: c_int) -> *const c_char;
 
     pub fn HMAC_Init_ex(ctx: *mut HMAC_CTX,
                         key: *const c_void,
