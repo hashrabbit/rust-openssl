@@ -21,8 +21,8 @@ environment:
       OPENSSL_DIR: C:\OpenSSL
 install:
   # install OpenSSL
-  - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL_Light-${env:OPENSSL_VERSION}.exe"
-  - Win%BITS%OpenSSL_Light-%OPENSSL_VERSION%.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
+  - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe"
+  - Win%BITS%OpenSSL-%OPENSSL_VERSION%.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
 
   # Install Rust
   - curl -sSf -o rustup-init.exe https://win.rustup.rs/
