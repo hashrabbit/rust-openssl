@@ -42,13 +42,14 @@ impl Drop for RSA {
 impl RSA {
     /// only useful for associating the key material directly with the key, it's safer to use
     /// the supplied load and save methods for DER formatted keys.
-    pub fn from_public_components(n: BigNum,
-                                  e: BigNum,
-                                  d: BigNum) -> Result<RSA, ErrorStack> {
+    pub fn from_public_components(n: BigNum, e: BigNum) -> Result<RSA, ErrorStack> {
         unsafe {
             let rsa = RSA(try_ssl_null!(ffi::RSA_new()));
-            try_ssl!(compat::set_key(rsa.0, n.as_ptr(), e.as_ptr(), d.as_ptr()));
-            mem::forget((n, e, d));
+            try_ssl!(compat::set_key(rsa.0,
+                                     n.as_ptr(),
+                                     e.as_ptr(),
+                                     ptr::null_mut()));
+            mem::forget((n, e));
             Ok(rsa)
         }
     }
