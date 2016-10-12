@@ -13,6 +13,7 @@ use std::thread;
 use std::time::Duration;
 
 use net2::TcpStreamExt;
+use tempdir::TempDir;
 
 use crypto::hash::Type::SHA256;
 use ssl;
@@ -47,6 +48,7 @@ fn next_addr() -> SocketAddr {
 
 struct Server {
     p: Child,
+    _temp: TempDir,
 }
 
 impl Server {
@@ -54,11 +56,10 @@ impl Server {
         static CERT: &'static [u8] = include_bytes!("../../../test/cert.pem");
         static KEY: &'static [u8] = include_bytes!("../../../test/key.pem");
 
-        let mut me = env::current_exe().unwrap();
-        me.pop();
-        let cert = me.join("cert.pem");
-        let key = me.join("key.pem");
 
+        let td = TempDir::new("openssl").unwrap();
+        let cert = td.path().join("cert.pem");
+        let key = td.path().join("key.pem");
         File::create(&cert).unwrap().write_all(CERT).unwrap();
         File::create(&key).unwrap().write_all(KEY).unwrap();
 
@@ -82,7 +83,7 @@ impl Server {
         if let Some(mut input) = input {
             thread::spawn(move || input(stdin));
         }
-        (Server { p: child }, addr)
+        (Server { p: child, _temp: td }, addr)
     }
 
     fn new_tcp(args: &[&str]) -> (Server, TcpStream) {
