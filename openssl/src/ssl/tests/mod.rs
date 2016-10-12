@@ -131,7 +131,7 @@ impl Server {
         // but don't currently have a great way to do that so just wait for a
         // bit.
         thread::sleep(Duration::from_millis(100));
-        let socket = UdpSocket::bind(next_addr()).unwrap();
+        let socket = UdpSocket::bind("127.0.0.1:0").unwrap();
         socket.connect(&addr).unwrap();
         (s, UdpConnected(socket))
     }
@@ -398,7 +398,7 @@ run_test!(ssl_verify_callback, |method, stream| {
 // Make sure every write call translates to a write call to the underlying socket.
 #[test]
 fn test_write_hits_stream() {
-    let listener = TcpListener::bind(next_addr()).unwrap();
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
 
     let guard = thread::spawn(move || {
@@ -686,7 +686,7 @@ fn test_connect_with_npn_successful_single_match() {
 #[test]
 #[cfg(all(feature = "npn", not(ossl101)))]
 fn test_npn_server_advertise_multiple() {
-    let listener = TcpListener::bind(next_addr()).unwrap();
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let localhost = listener.local_addr().unwrap();
     // We create a different context instance for the server...
     let listener_ctx = {
@@ -727,7 +727,7 @@ fn test_npn_server_advertise_multiple() {
 #[test]
 #[cfg(all(feature = "alpn", not(ossl101)))]
 fn test_alpn_server_advertise_multiple() {
-    let listener = TcpListener::bind(next_addr()).unwrap();
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let localhost = listener.local_addr().unwrap();
     // We create a different context instance for the server...
     let listener_ctx = {
@@ -768,7 +768,7 @@ fn test_alpn_server_advertise_multiple() {
 #[test]
 #[cfg(all(feature = "alpn", not(ossl101)))]
 fn test_alpn_server_select_none() {
-    let listener = TcpListener::bind(next_addr()).unwrap();
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let localhost = listener.local_addr().unwrap();
     // We create a different context instance for the server...
     let listener_ctx = {
