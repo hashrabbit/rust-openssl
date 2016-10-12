@@ -405,9 +405,6 @@ extern {
     #[cfg(not(ossl101))]
     pub fn DH_get_2048_256() -> *mut DH;
 
-    // FIXME delete on next version bump
-    pub fn DH_new_from_params(p: *mut BIGNUM, g: *mut BIGNUM, q: *mut BIGNUM) -> *mut DH;
-
     pub fn ERR_get_error() -> c_ulong;
 
     pub fn ERR_lib_error_string(err: c_ulong) -> *const c_char;

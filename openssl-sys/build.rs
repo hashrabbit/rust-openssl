@@ -60,7 +60,16 @@ fn find_openssl_dir(target: &str) -> OsString {
         if homebrew.exists() {
             return homebrew.to_path_buf().into()
         }
+    }
 
+    try_pkg_config();
+
+    // TODO: try to be more helpful in this message, e.g.:
+    //
+    // * if we're on linux, recommend apt-get something or other
+    // * if we're on Windows, link to a README explaining more
+
+    if host.contains("apple-darwin") && target.contains("apple-darwin") {
         let system = Path::new("/usr/lib/libssl.0.9.8.dylib");
         if system.exists() {
             panic!("
@@ -78,13 +87,6 @@ Unfortunately though the compile cannot continue, so aborting.
 ");
         }
     }
-
-    try_pkg_config();
-
-    // TODO: try to be more helpful in this message, e.g.:
-    //
-    // * if we're on linux, recommend apt-get something or other
-    // * if we're on Windows, link to a README explaining more
 
     panic!("
 

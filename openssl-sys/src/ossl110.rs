@@ -41,9 +41,7 @@ pub const OPENSSL_DIR: c_int = 4;
 pub const CRYPTO_EX_INDEX_SSL: c_int = 0;
 pub const CRYPTO_EX_INDEX_SSL_CTX: c_int = 1;
 
-pub fn init() {
-    // TODO: fill this in, probably need to at least do something?
-}
+pub fn init() {}
 
 extern {
     pub fn BIO_new(type_: *const BIO_METHOD) -> *mut BIO;

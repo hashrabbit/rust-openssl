@@ -73,7 +73,6 @@ fn main() {
     });
     cfg.skip_fn(move |s| {
         s == "CRYPTO_memcmp" ||                 // uses volatile
-            s == "DH_new_from_params" ||        // not defined
             s == "X509V3_EXT_conf_nid" ||       // weird lhash first param
             s == "X509V3_EXT_conf" ||           // weird lhash first param
 

@@ -185,9 +185,7 @@ mod compat {
     use ffi;
     pub use ffi::{BIO_set_init, BIO_set_flags, BIO_set_data, BIO_get_data};
 
-    pub unsafe fn BIO_set_num(_bio: *mut ffi::BIO, _num: c_int) {
-        // TODO: what should this do?
-    }
+    pub unsafe fn BIO_set_num(_bio: *mut ffi::BIO, _num: c_int) {}
 
     pub struct BIO_METHOD {
         inner: *mut ffi::BIO_METHOD,
